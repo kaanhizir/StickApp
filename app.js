@@ -49,7 +49,7 @@ io.on('connection', (socket) => {
   socket.on('play', () => {
     const selectedBoxes = boxes.filter((box) => box.selected);
     if (selectedBoxes.length === 0) {
-      return; // Hiçbir kutu seçilmedi, oyunu başlatma
+      return; 
     }
 
     selectedBoxes.sort((a, b) => a.value - b.value);
