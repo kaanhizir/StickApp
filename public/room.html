@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kutu Seç</title>
+</head>
+<body>
+    <h1>Kutu Seç</h1>
+    <input type="text" id="usernameInput" placeholder="Kullanıcı Adı">
+    <button onclick="addBox()">Kutu Ekle</button>
+    <button onclick="play()">Oyna</button>
+    <div id="boxes"></div>
+    <div id="result"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('room');
+
+        // Odaya katılma isteği gönder
+        socket.emit('joinRoom', roomID);
+
+        socket.on('updateBoxes', (boxes) => {
+            const boxesDiv = document.getElementById('boxes');
+            boxesDiv.innerHTML = '';
+            boxes.forEach((box) => {
+                const boxDiv = document.createElement('div');
+                boxDiv.className = 'box';
+                boxDiv.style.backgroundColor = box.selected ? 'green' : 'red';
+                //boxDiv.textContent = box.value;
+                boxDiv.dataset.username = box.username;
+
+                if (box.selected) {
+                    const usernameDiv = document.createElement('div');
+                    usernameDiv.textContent = box.username;
+                    boxDiv.appendChild(usernameDiv);
+                }
+
+                boxDiv.addEventListener('click', () => {
+                    if (!box.selected) {
+                        socket.emit('selectBox', box.username);
+                    }
+                });
+
+                boxesDiv.appendChild(boxDiv);
+            });
+        });
+
+        socket.on('gameOver', (username) => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = `${username} oyunu kaybetti!`;
+        });
+
+        function addBox() {
+            const usernameInput = document.getElementById('usernameInput');
+            const username = usernameInput.value.trim();
+            if (username !== '') {
+                socket.emit('addBox', username);
+                usernameInput.value = '';
+            }
+        }
+
+        function play() {
+            socket.emit('play');
+        }
+    </script>
+    <style>
+        .box {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            text-align: center;
+            line-height: 50px;
+            color: black;
+            cursor: pointer;
+        }
+    </style>
+</body>
+</html>

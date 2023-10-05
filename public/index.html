@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Oda Oluştur</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Oda Oluştur</h1>
+  <input type="text" id="roomName" placeholder="Oda Adı">
+  <button id="createRoom">Oda Oluştur</button>
+
+  <script>
+    const socket = io();
+
+    document.getElementById('createRoom').addEventListener('click', () => {
+      const roomName = document.getElementById('roomName').value;
+      socket.emit('createRoom', roomName);
+    });
+
+    socket.on('roomCreated', (roomID) => {
+      window.location.href = `/room.html?room=${roomID}`;
+    });
+  </script>
+</body>
+</html>
